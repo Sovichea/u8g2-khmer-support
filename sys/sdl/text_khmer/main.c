@@ -1,5 +1,5 @@
 #include "u8g2.h"
-#include "fonts/notosans_15.h"
+#include "fonts/notosans_6x8.h"
 #include "shape_khmer.h"
 #include <stdio.h>
 
@@ -12,7 +12,7 @@ const char *str[] = {
   "ត្ត ថ្ថ ទ្ទ ធ្ធ ន្ន",
   "ប្ប ផ្ផ ព្ព ភ្ភ ម្ម",
   "យ្យ រ្រ ល្ល វ្វ ស្ស ហ្ហ ឡ អ្អ",
-  "០ ១ ២ ៣ ៤",
+  "០ ១ ២ ៣ ៤ មណ្ឌល",
   "៥ ៦ ៧ ៨ ៩ ស្បៀង ងី",
   "ស្ត្រេស តន្ត្រី ស៊ី ចាប៉ី ស៊ាំ",
   "ស៊ើប ប៉េងប៉ោះ ខ្ញុំ កញ្ញា",
@@ -40,7 +40,7 @@ int main(void)
   u8g2_SetFontMode(&u8g2, 1);  // Transparent
 
   u8g2_SetFontDirection(&u8g2, 0);
-  u8g2_SetFont(&u8g2, notosans_15);
+  u8g2_SetFont(&u8g2, notosans_6x8);
   
   while (1)
   {
