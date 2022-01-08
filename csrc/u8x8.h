@@ -190,8 +190,17 @@ uint8_t u8x8_pgm_read_esp(const uint8_t * addr);   /* u8x8_8x8.c */
 #define U8X8_USE_PINS
 #endif
 
-#ifdef RTT_U8G2
+#ifdef __RTTHREAD__
 #define U8X8_USE_PINS
+#endif
+
+#ifdef __ARM_LINUX__
+#define U8X8_USE_PINS
+#endif
+
+#if defined(__ARM_LINUX__) || defined(unix) || defined(__unix__) || defined(__unix)
+/* https://github.com/olikraus/u8g2/pull/1666 */
+#define U8X8_BUS_NUM
 #endif
 
 /*==========================================*/
@@ -342,6 +351,12 @@ struct u8x8_struct
   uint16_t encoding;		/* encoding result for utf8 decoder in next_cb */
   uint8_t x_offset;	/* copied from info struct, can be modified in flip mode */
   uint8_t is_font_inverse_mode; 	/* 0: normal, 1: font glyphs are inverted */
+#ifdef U8X8_BUS_NUM
+/* https://github.com/olikraus/u8g2/pull/1666 */
+  uint8_t gpio_chip_num; /* gpio chip  */
+  uint8_t spi_bus_num; /* spi bus to use */
+  uint8_t i2c_bus_num; /* i2c bus to use */
+#endif
   uint8_t i2c_address;	/* a valid i2c adr. Initially this is 255, but this is set to something usefull during DISPLAY_INIT */
 					/* i2c_address is the address for writing data to the display */
 					/* usually, the lowest bit must be zero for a valid address */
@@ -369,6 +384,15 @@ struct u8x8_struct
 
 #define u8x8_GetCols(u8x8) ((u8x8)->display_info->tile_width)
 #define u8x8_GetRows(u8x8) ((u8x8)->display_info->tile_height)
+#ifdef U8X8_BUS_NUM
+/* https://github.com/olikraus/u8g2/pull/1666 */
+#define u8x8_GetGPIOChip(u8x8) ((u8x8)->gpio_chip_num)
+#define u8x8_SetGPIOChip(u8x8, chip_num) ((u8x8)->gpio_chip_num = (chip_num))
+#define u8x8_GetSPIBus(u8x8) ((u8x8)->spi_bus_num)
+#define u8x8_SetSPIBus(u8x8, bus_num) ((u8x8)->spi_bus_num = (bus_num))
+#define u8x8_GetI2CBus(u8x8) ((u8x8)->i2c_bus_num)
+#define u8x8_SetI2CBus(u8x8, bus_num) ((u8x8)->i2c_bus_num = (bus_num))
+#endif
 #define u8x8_GetI2CAddress(u8x8) ((u8x8)->i2c_address)
 #define u8x8_SetI2CAddress(u8x8, address) ((u8x8)->i2c_address = (address))
 
@@ -646,6 +670,7 @@ void u8x8_SendF(u8x8_t * u8x8, const char *fmt, ...);
 void u8x8_cad_SendSequence(u8x8_t *u8x8, uint8_t const *data);
 uint8_t u8x8_cad_empty(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 uint8_t u8x8_cad_110(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
+uint8_t u8x8_gu800_cad_110(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 uint8_t u8x8_cad_001(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 uint8_t u8x8_cad_011(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 uint8_t u8x8_cad_100(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
@@ -835,10 +860,12 @@ uint8_t u8x8_d_sh1106_64x32(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *ar
 uint8_t u8x8_d_sh1107_64x128(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 uint8_t u8x8_d_sh1107_seeed_96x96(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 uint8_t u8x8_d_sh1107_128x128(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
+uint8_t u8x8_d_sh1107_128x80(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 uint8_t u8x8_d_sh1107_pimoroni_128x128(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 uint8_t u8x8_d_sh1107_seeed_128x128(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 uint8_t u8x8_d_sh1108_160x160(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 uint8_t u8x8_d_sh1122_256x64(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
+uint8_t u8x8_d_st7920_256x32(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 uint8_t u8x8_d_st7920_192x32(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 uint8_t u8x8_d_st7920_128x64(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 uint8_t u8x8_d_ssd1306_2040x16(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
@@ -884,6 +911,7 @@ uint8_t u8x8_d_st7586s_s028hn118a(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, vo
 uint8_t u8x8_d_st7586s_erc240160(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 uint8_t u8x8_d_st7586s_ymc240160(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 uint8_t u8x8_d_st7588_jlx12864(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
+uint8_t u8x8_d_st75160_jm16096(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 uint8_t u8x8_d_st75256_jlx256128(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 uint8_t u8x8_d_st75256_wo256x128(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 uint8_t u8x8_d_st75256_jlx256160(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
@@ -971,6 +999,7 @@ uint8_t u8x8_d_max7219_16x16(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *a
 uint8_t u8x8_d_max7219_8x8(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 uint8_t u8x8_d_s1d15e06_160100(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 uint8_t u8x8_d_s1d15721_240x64(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
+uint8_t u8x8_d_gu800_128x64(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 
 
 

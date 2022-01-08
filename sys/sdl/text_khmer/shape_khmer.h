@@ -63,7 +63,7 @@ static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint
 
   // Serial.print("\n\n");
   // Serial.print("Shape output:");
-  printf("\n\nShape output:");
+  // printf("\n\nShape output:");
   uint8_t state = START;
   uint16_t pref[2] = {0, 0}; // 0: pre-base vowel, 1: sub 2
   uint16_t base = 0;    // base consonant
@@ -89,7 +89,7 @@ static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint
         {
           *(out_ptr++) = ascii;
           // Serial.print(" U+"); Serial.print(ascii, HEX);
-          printf(" U+%X", ascii);
+          // printf(" U+%X", ascii);
           ascii = 0;
         }
 
@@ -100,7 +100,7 @@ static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint
           {
             *(out_ptr++) = pref[i];
             // Serial.print(" U+"); Serial.print(pref[i], HEX);
-            printf(" U+%X", pref[i]);
+            // printf(" U+%X", pref[i]);
             pref[i] = 0;
           }
         }
@@ -109,7 +109,7 @@ static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint
         {
           *(out_ptr++) = base;
           // Serial.print(" U+"); Serial.print(base, HEX);
-          printf(" U+%X", base);
+          // printf(" U+%X", base);
           base = 0;
         }
 
@@ -119,7 +119,7 @@ static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint
           {
             *(out_ptr++) = blwf[i];
             // Serial.print(" U+"); Serial.print(blwf[i], HEX);
-            printf(" U+%X", blwf[i]);
+            // printf(" U+%X", blwf[i]);
             blwf[i] = 0;
           }
         }
@@ -130,7 +130,7 @@ static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint
           {
             *(out_ptr++) = abvf[i];
             // Serial.print(" U+"); Serial.print(abvf[i], HEX);
-            printf(" U+%X", abvf[i]);
+            // printf(" U+%X", abvf[i]);
             abvf[i] = 0;
           }
         }
@@ -141,7 +141,7 @@ static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint
           {
             *(out_ptr++) = pstf[i];
             // Serial.print(" U+"); Serial.print(pstf[i], HEX);
-            printf(" U+%X", pstf[i]);
+            // printf(" U+%X", pstf[i]);
             pstf[i] = 0;
           }
         }
@@ -265,10 +265,13 @@ static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint
         }
 
         // substitute NHO
-        if (base == 0x1789 && blwf[0] == 0xE009)
+        if (base == 0x1789 && blwf[0] != 0)
         {
           base = 0xE029;
-          blwf[0] = 0xE00A;
+          if (blwf[0] == 0xE009)
+          {
+            blwf[0] = 0xE00A;
+          }
         }
 
         // substitute COENG MO and COENG HA
@@ -301,7 +304,7 @@ static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint
       }
     }
   }
-  printf("\n\r");
+  // printf("\n\r");
 
   out_ptr = (uint16_t*)e_buf_out;
   while(*(out_ptr) != 0)

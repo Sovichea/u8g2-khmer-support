@@ -1,15 +1,37 @@
-
 #include "u8g2.h"
-#include "fonts/nokora_16.h"
+#include "fonts/notosans_15.h""
 #include "shape_khmer.h"
 #include <stdio.h>
 
 u8g2_t u8g2;
 
+const char *str[] = {
+  "ក្ក ខ្ខ គ្គ ឃ្ឃ ង្ង",
+  "ច្ច ឆ្ឆ ជ្ជ ឈ្ឈ ញ្ញ",
+  "ដ្ដ ឋ្ឋ ឌ្ឌ ឍ្ឍ ណ្ណ",
+  "ត្ត ថ្ថ ទ្ទ ធ្ធ ន្ន",
+  "ប្ប ផ្ផ ព្ព ភ្ភ ម្ម",
+  "យ្យ រ្រ ល្ល វ្វ ស្ស ហ្ហ ឡ អ្អ",
+  "០ ១ ២ ៣ ៤",
+  "៥ ៦ ៧ ៨ ៩ ស្បៀង ងី",
+  "ស្ត្រេស តន្ត្រី ស៊ី ចាប៉ី ស៊ាំ",
+  "ស៊ើប ប៉េងប៉ោះ ខ្ញុំ កញ្ញា",
+  "បណ្តុំ លក្ស្មី សង្គ្រៀម ឲ្យ",
+  "កំណត់សំណើមដី រៀន",
+  "ម៉ោងស្រោច ចេញ ជំរឿន",
+  "ម៉ោងនៃប្រព័ន្ធ ល្បឿន",
+  "ធ្វើតេស្តការបញ្ជារ ខឿន",
+
+};
+
 int main(void)
 {
-  int x, y;
+  int x = 0;
+  int list_size;
   int k;
+
+  list_size = sizeof(str)/8;
+  printf("list_size=%d\n\r", list_size);
   
   // u8g2_SetupBuffer_SDL_240x160(&u8g2, &u8g2_cb_r0);
   u8g2_SetupBuffer_SDL_128x64(&u8g2, &u8g2_cb_r0);
@@ -19,22 +41,41 @@ int main(void)
   u8g2_SetFontMode(&u8g2, 1);  // Transparent
 
   u8g2_SetFontDirection(&u8g2, 0);
-  u8g2_SetFont(&u8g2, nokora_16);
-
-  u8g2_ClearBuffer(&u8g2);
-  u8g2_draw_string_khmer(&u8g2, 2, 14, "ស្ត្រេស តន្ត្រី ស៊ី ចាប៉ី ស៊ាំ", 0);
-  u8g2_draw_string_khmer(&u8g2, 2, 34, "ស៊ើប ប៉េងបោះ ខ្ញុំ កញ្ញា", 0);
-  u8g2_draw_string_khmer(&u8g2, 2, 54, "បណ្តុំ លក្ស្មី សង្គ្រៀម ឲ្យ", 0);
-  u8g2_SendBuffer(&u8g2);
+  u8g2_SetFont(&u8g2, notosans_15);
   
   /* with for close window event */
-  do
+  while (1)
   {
-    k = u8g_sdl_get_key();
-  } while( k != 'q' );
-    
+    u8g2_ClearBuffer(&u8g2);
+    u8g2_draw_string_khmer(&u8g2, 0, 14, str[x], 0);
+    u8g2_draw_string_khmer(&u8g2, 0, 35, str[x+1], 0);
+    u8g2_draw_string_khmer(&u8g2, 0, 56, str[x+2], 0);
+    u8g2_SendBuffer(&u8g2);
 
-  
-  return 0;
+    do
+    {
+      k = u8g_sdl_get_key();
+    } while( k == -1);
+
+    if (k == 'q') return 0;
+    else if (k == 'n')
+    {
+      /* Display the next 3 rows in the list */
+      x += 3; 
+      if (x > list_size-1) x = 0;
+    }
+    else if (k == 'p')
+    {
+      /* Display the previous 3 rows in the list */
+      x -= 3; 
+      if (x < 0) x = list_size-3;
+    }
+    else if (k == 'h')
+    {
+      /* Return the top of the list */
+      x = 0;
+    }
+  }
+
 }
 

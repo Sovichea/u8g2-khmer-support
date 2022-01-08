@@ -18,7 +18,7 @@ SDL_Window *u8g_sdl_window;
 SDL_Surface *u8g_sdl_screen;
 #endif
 
-int u8g_sdl_multiple = 4;
+int u8g_sdl_multiple = 6;
 uint32_t u8g_sdl_color[256];
 int u8g_sdl_height, u8g_sdl_width;
 
@@ -125,7 +125,7 @@ static void u8g_sdl_init(int width, int height)
   u8g_sdl_color[0] = SDL_MapRGB( u8g_sdl_screen->format, 0, 0, 0 );
   u8g_sdl_color[1] = SDL_MapRGB( u8g_sdl_screen->format, W(100, 50), W(255,50), 0 );
   u8g_sdl_color[2] = SDL_MapRGB( u8g_sdl_screen->format, W(100, 80), W(255,80), 0 );
-  u8g_sdl_color[3] = SDL_MapRGB( u8g_sdl_screen->format, 191, 192, 191 );
+  u8g_sdl_color[3] = SDL_MapRGB( u8g_sdl_screen->format, 0, 255, 0 );
   u8g_sdl_color[4] = SDL_MapRGB( u8g_sdl_screen->format, 30, 30, 30 );
 
   /*
