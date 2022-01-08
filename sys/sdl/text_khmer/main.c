@@ -1,5 +1,6 @@
 #include "u8g2.h"
 #include "fonts/notosans_6x8.h"
+#include "fonts/notosans_7x8.h"
 #include "shape_khmer.h"
 #include <stdio.h>
 
