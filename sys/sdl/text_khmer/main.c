@@ -1,5 +1,5 @@
 #include "u8g2.h"
-#include "fonts/notosans_15.h""
+#include "fonts/notosans_15.h"
 #include "shape_khmer.h"
 #include <stdio.h>
 
@@ -21,7 +21,6 @@ const char *str[] = {
   "ម៉ោងស្រោច ចេញ ជំរឿន",
   "ម៉ោងនៃប្រព័ន្ធ ល្បឿន",
   "ធ្វើតេស្តការបញ្ជារ ខឿន",
-
 };
 
 int main(void)
@@ -43,7 +42,6 @@ int main(void)
   u8g2_SetFontDirection(&u8g2, 0);
   u8g2_SetFont(&u8g2, notosans_15);
   
-  /* with for close window event */
   while (1)
   {
     u8g2_ClearBuffer(&u8g2);
@@ -57,6 +55,7 @@ int main(void)
       k = u8g_sdl_get_key();
     } while( k == -1);
 
+     /* Close window event */
     if (k == 'q') return 0;
     else if (k == 'n')
     {
