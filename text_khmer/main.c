@@ -21,6 +21,8 @@ const char *str[] = {
   "ម៉ោងស្រោច ចេញ ជំរឿន",
   "ម៉ោងនៃប្រព័ន្ធ ល្បឿន",
   "ធ្វើតេស្តការបញ្ជារ ខឿន",
+  "ជួរទី១",
+  "ជួរទី២",
 };
 
 int main(void)
@@ -30,7 +32,8 @@ int main(void)
   int k;
 
   list_size = sizeof(str)/8;
-  printf("list_size=%d\n\r", list_size);
+
+  // printf("list_size=%d\n\r", list_size);
   
   // u8g2_SetupBuffer_SDL_240x160(&u8g2, &u8g2_cb_r0);
   u8g2_SetupBuffer_SDL_128x64(&u8g2, &u8g2_cb_r0);
@@ -47,8 +50,10 @@ int main(void)
   {
     u8g2_ClearBuffer(&u8g2);
     u8g2_draw_string_khmer(&u8g2, 0, 14, str[x], 0);
-    u8g2_draw_string_khmer(&u8g2, 0, 35, str[x+1], 0);
-    u8g2_draw_string_khmer(&u8g2, 0, 56, str[x+2], 0);
+    if (x+1 < list_size) u8g2_draw_string_khmer(&u8g2, 0, 35, str[x+1], 0);
+    else u8g2_draw_string_khmer(&u8g2, 0, 35, "", 0);
+    if (x+2 < list_size) u8g2_draw_string_khmer(&u8g2, 0, 56, str[x+2], 0);
+    else u8g2_draw_string_khmer(&u8g2, 0, 56, "", 0);
     u8g2_SendBuffer(&u8g2);
 
     do
@@ -68,7 +73,7 @@ int main(void)
     {
       /* Display the previous 3 rows in the list */
       x -= 3; 
-      if (x < 0) x = list_size-3;
+      if (x < 0) x = list_size - (list_size % 3);
     }
     else if (k == 'h')
     {
