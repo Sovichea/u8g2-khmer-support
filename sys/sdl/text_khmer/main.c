@@ -1,6 +1,6 @@
 #include "u8g2.h"
 #include "fonts/notosans_6x8.h"
-#include "fonts/notosans_7x8.h"
+#include "fonts/notosans_6x9.h"
 #include "shape_khmer.h"
 #include <stdio.h>
 
@@ -41,7 +41,8 @@ int main(void)
   u8g2_SetFontMode(&u8g2, 1);  // Transparent
 
   u8g2_SetFontDirection(&u8g2, 0);
-  u8g2_SetFont(&u8g2, notosans_6x8);
+  // u8g2_SetFont(&u8g2, notosans_6x8);
+  u8g2_SetFont(&u8g2, notosans_6x9);
   
   while (1)
   {
