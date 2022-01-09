@@ -21,8 +21,7 @@ const char *str[] = {
   "ម៉ោងស្រោច ចេញ ជំរឿន",
   "ម៉ោងនៃប្រព័ន្ធ ល្បឿន",
   "ធ្វើតេស្តការបញ្ជារ ខឿន",
-  "ជួរទី១",
-  "ជួរទី២",
+  "ជួរទី១"
 };
 
 int main(void)
@@ -73,7 +72,12 @@ int main(void)
     {
       /* Display the previous 3 rows in the list */
       x -= 3; 
-      if (x < 0) x = list_size - (list_size % 3);
+      if (x < 0) 
+      {
+        if (list_size % 3 == 0) x = list_size - 3;
+        else x = list_size - (list_size % 3);
+      }
+
     }
     else if (k == 'h')
     {
