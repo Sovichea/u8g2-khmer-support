@@ -2,3 +2,4 @@
 *.tga
 *.bak
 .vscode
+u8g2_sdl
