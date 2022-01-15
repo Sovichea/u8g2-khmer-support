@@ -1,5 +1,6 @@
 #include <stdio.h>
-#include "shape_khmer.h"
+#include "u8g2.h"
+#include "u8g2_font_khmer.h"
 #include "fonts/notosans_6x8.h"
 #include "fonts/notosans_6x9.h"
 
@@ -48,11 +49,11 @@ int main(void)
   while (1)
   {
     u8g2_ClearBuffer(&u8g2);
-    u8g2_draw_string_khmer(&u8g2, 0, 14, str[x], 0);
-    if (x+1 < list_size) u8g2_draw_string_khmer(&u8g2, 0, 35, str[x+1], 0);
-    else u8g2_draw_string_khmer(&u8g2, 0, 35, "", 0);
-    if (x+2 < list_size) u8g2_draw_string_khmer(&u8g2, 0, 56, str[x+2], 0);
-    else u8g2_draw_string_khmer(&u8g2, 0, 56, "", 0);
+    u8g2_DrawKhmer(&u8g2, 0, 14, str[x]);
+    if (x+1 < list_size) u8g2_DrawKhmer(&u8g2, 0, 35, str[x+1]);
+    else u8g2_DrawKhmer(&u8g2, 0, 35, "");
+    if (x+2 < list_size) u8g2_DrawKhmer(&u8g2, 0, 56, str[x+2]);
+    else u8g2_DrawKhmer(&u8g2, 0, 56, "");
     u8g2_SendBuffer(&u8g2);
 
     do

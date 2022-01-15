@@ -1,3 +1,4 @@
 *.o
 *.tga
 *.bak
+.vscode
