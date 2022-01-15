@@ -18,7 +18,7 @@ static uint8_t is_base_glyph(uint16_t u)
 
 static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, const char *str)
 {
-  uint16_t e, e_prev;
+  uint16_t e, e_prev = 0;
   uint16_t e_buf_in[80] = {0};
   uint16_t e_buf_out[80] = {0};
   uint16_t * in_ptr; 
@@ -270,7 +270,7 @@ static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint
         // subsitute regshift
         if (abvf[0] == 0x17C9 || abvf[0] == 0x17CA)
         {
-          if (abvf[1] >= 0x17B7 && abvf[1] <= 0x17BA 
+          if ((abvf[1] >= 0x17B7 && abvf[1] <= 0x17BA) 
             || abvf[1] == 0x17BE
             || pstf[2] == 0x17C6)
           {
