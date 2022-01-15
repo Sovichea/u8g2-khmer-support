@@ -208,9 +208,9 @@ static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint
         }
 
         // check for post-base vowel
-        if (u == 0x17B6 || u == 0x17BF || u == 0x17C0 || u == 0x17C4 || u == 0x17C5 || u == 0x17C7)
+        if (u == 0x17B6 || u == 0x17BF || u == 0x17C0 || u == 0x17C4 || u == 0x17C5 || u == 0x17C7 || u == 0x17C8)
         {
-          if (u == 0x17C7)
+          if (u == 0x17C7 || u == 0x17C8)
           {
             pstf[2] = u;
           }
@@ -223,7 +223,7 @@ static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint
             pstf[0] = u;
           }
           
-          if (u != 0x17B6 && u != 0x17C7)
+          if (u != 0x17B6 && u != 0x17C7 && u != 0x17C8)
           {
             pref[0] = 0x17C1;
           }
