@@ -1,6 +1,6 @@
-CFLAGS = -g -Wall -I../../u8g2/csrc/. -I../../fonts -I../../include  `sdl2-config --cflags`
+CFLAGS = -g -Wall -I../../u8g2/csrc/. -I../../include  `sdl2-config --cflags`
 
-SRC = $(shell ls ../../u8g2/csrc/*.c) ../../u8g2/sys/bitmap/common/u8x8_d_bitmap.c $(shell ls ../../u8g2/sys/sdl/common/*.c ) $(shell ls ../../fonts/*.c) ../../src/u8g2_font_khmer.c main.c
+SRC = $(shell ls ../../u8g2/csrc/*.c) ../../u8g2/sys/bitmap/common/u8x8_d_bitmap.c $(shell ls ../../u8g2/sys/sdl/common/*.c ) $(shell ls ../../src/*.c) main.c
 
 OBJ = $(SRC:.c=.o)
 
