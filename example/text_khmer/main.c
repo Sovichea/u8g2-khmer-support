@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include "u8g2.h"
 #include "u8g2_font_khmer.h"
-#include "fonts/notosans_6x8.h"
-#include "fonts/notosans_6x9.h"
 
 u8g2_t u8g2;
 
