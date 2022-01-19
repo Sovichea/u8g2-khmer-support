@@ -42,10 +42,10 @@ static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint
       // remap subscript code point to Private Use Area 0xE000
       if (e_prev == 0x17D2)
       {
-        if (e <= 0x1789) e += 0xC880;
-        else if (e >= 0x178A && e <= 0x179C) e += 0xC881;
-        else if (e >= 0x179F && e <= 0x17A0) e += 0xC87F;
-        else if (e == 0x17A2) e = 0xE020;
+        e += 0xC880;
+        // else if (e >= 0x178A && e <= 0x179C) e += 0xC881;
+        // else if (e >= 0x179F && e <= 0x17A0) e += 0xC87F;
+        // else if (e == 0x17A2) e = 0xE020;
       }
 
       // discard COENG code point and store decoded code point to buffer
@@ -166,7 +166,7 @@ static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint
         {
           pref[0] = u;
         }
-        else if (u == 0xE01B) 
+        else if (u == 0xE01A) 
         {
           pref[1] = u;
         }
@@ -178,7 +178,7 @@ static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint
         }
 
         // check for sub type 1 and 3, then below-base vowel
-        if (u >= 0xE000 && u <= 0xE020 && u != 0xE01B)
+        if (u >= 0xE000 && u <= 0xE021 && u != 0xE01A)
         {
           if (blwf[0] == 0) blwf[0] = u;
           else blwf[1] = u;
@@ -250,22 +250,22 @@ static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint
         if (base == 0x1794 && (pstf[1] == 0x17B6
           || pstf[1] == 0x17C4 || pstf[1] == 0x17C5))
         {
-          base = 0xE02A;
+          base = 0xE062;
         }
 
         // substitute NHO
         if (base == 0x1789 && blwf[0] != 0)
         {
-          base = 0xE029;
+          base = 0xE061;
           if (blwf[0] == 0xE009)
           {
-            blwf[0] = 0xE00A;
+            blwf[0] = 0xE060;
           }
         }
 
         // substitute COENG MO and COENG HA
-        if (blwf[1] == 0xE019) blwf[1] = 0xE044;
-        if (blwf[1] == 0xE01F) blwf[1] = 0xE045;
+        // if (blwf[1] == 0xE019) blwf[1] = 0xE044;
+        // if (blwf[1] == 0xE01F) blwf[1] = 0xE045;
 
         // subsitute regshift
         if (abvf[0] == 0x17C9 || abvf[0] == 0x17CA)
@@ -282,11 +282,11 @@ static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint
         // substitute below vowel
         if (blwf[0] != 0 && blwf[2] != 0)
         {
-          blwf[2] += 0xC866;
+          blwf[2] += 0xC880;
         }
 
         // substitue post vowel
-        if (blwf[0] != 0 && pstf[0] != 0) pstf[0] += 0xC86E;
+        if (blwf[0] != 0 && pstf[0] != 0) pstf[0] += 0xC880;
         
         state = BUFFER_UPDATE;
         break;
