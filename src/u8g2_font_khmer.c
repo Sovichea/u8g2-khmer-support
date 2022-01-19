@@ -207,6 +207,13 @@ static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint
           }
         }
 
+        // support for  ិ៍
+        if (u == 0x17CD && abvf[1] == 0x17B7)
+        {
+          abvf[1] = 0;
+          abvf[0] = 0xE064;
+        }
+
         // check for post-base vowel
         if (u == 0x17B6 || u == 0x17BF || u == 0x17C0 || u == 0x17C4 || u == 0x17C5 || u == 0x17C7 || u == 0x17C8)
         {
@@ -296,29 +303,11 @@ static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint
   // printf("\n\r");
 
   out_ptr = (uint16_t*)e_buf_out;
+
   while(*(out_ptr) != 0)
   {
     delta = u8g2_DrawGlyph(u8g2, x, y, *(out_ptr++));
-#ifdef U8G2_WITH_FONT_ROTATION
-    switch(u8g2->font_decode.dir)
-    {
-    case 0:
-      x += delta;
-      break;
-    case 1:
-      y += delta;
-      break;
-    case 2:
-      x -= delta;
-      break;
-    case 3:
-      y -= delta;
-      break;
-    }
-#else
     x += delta;
-#endif
-
     sum += delta;
   }
   

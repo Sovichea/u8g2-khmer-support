@@ -20,7 +20,8 @@ const char *str[] = {
   "ម៉ោងស្រោចៈ ចេញ ជំរឿន",
   "ម៉ោងនៃប្រព័ន្ធ ល្បឿន",
   "ធ្វើតេស្តការបញ្ជារ ខឿន",
-  "ជួរទី១ រយៈពេល ស្រះទឹក"
+  "ជួរទី១ រយៈពេល ស្រះទឹក",
+  "ពោធិ៍សាត់ ដ៏ សប្តាហ៍"
 };
 
 int main(void)
@@ -41,8 +42,8 @@ int main(void)
   u8g2_SetFontMode(&u8g2, 1);  // Transparent
 
   u8g2_SetFontDirection(&u8g2, 0);
-  // u8g2_SetFont(&u8g2, notosans_6x9);
-  u8g2_SetFont(&u8g2, notosans_6x8);
+  u8g2_SetFont(&u8g2, notosans_6x9);
+  // u8g2_SetFont(&u8g2, notosans_6x8);
   
   while (1)
   {
