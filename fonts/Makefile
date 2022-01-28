@@ -1,3 +1,19 @@
+SRCS = $(shell ls *.bdf)
+OBJS = $(shell ls *.c)
+
 helloworld:
-	./bdfconv -v -f 1 -m '0-127,6016-6121,57344-57444' NotoSans_6x9.bdf -o notosans_6x9.c -n notosans_6x9 -d NotoSans_6x9.bdf
-	./bdfconv -v -f 1 -m '0-127,6016-6121,57344-57444' NotoSans_6x8.bdf -o notosans_6x8.c -n notosans_6x8 -d NotoSans_6x8.bdf
+	for name in $(basename $(SRCS)); do \
+		./bdfconv -v -f 1 -m '0-127,6016-6121,57344-57444' $${name}.bdf -o $${name}.c -n $${name} -d $${name}.bdf && \
+		sed -i '7s/^/#include "u8g2.h"\n/' $${name}.c \
+	;done
+
+header:
+	rm ../include/u8g2_font_khmer.h
+	cp ../include/header_template ../include/u8g2_font_khmer.h
+	sed -i '6d' ../include/u8g2_font_khmer.h
+	for name in $(basename $(SRCS)); do \
+		sed -i "6s/^/extern const uint8_t $${name}[] U8G2_FONT_SECTION("$${name}");\n/" ../include/u8g2_font_khmer.h \
+	;done	
+
+clean:
+	rm $(OBJS)
