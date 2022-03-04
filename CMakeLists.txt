@@ -3,6 +3,7 @@ set(srcs
 	"fonts/notosans_6x8.c"
 	"fonts/notosans_6x9.c"
 	"fonts/u8g2KHTest_R16.c"
+	"fonts/waffle_10.c"
 )
 idf_component_register(SRCS "${srcs}"  
                     INCLUDE_DIRS "include"
