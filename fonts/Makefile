@@ -3,7 +3,7 @@ OBJS = $(shell ls *.c)
 
 helloworld:
 	for name in $(basename $(SRCS)); do \
-		./bdfconv -v -f 1 -m '0-127,6016-6121,57344-58144' $${name}.bdf -o $${name}.c -n $${name} -d $${name}.bdf && \
+		./bdfconv -v -f 1 -m '0-255,8320-8459,6016-6130,57344-58144' $${name}.bdf -o $${name}.c -n $${name} -d $${name}.bdf && \
 		sed -i '7s/^/#include "u8g2.h"\n/' $${name}.c \
 	;done
 

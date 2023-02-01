@@ -1,19 +1,89 @@
 #include <stdio.h>
+#include <string.h>
 #include "u8g2_font_khmer.h"
 
-enum
-{
-  START,
-  STOP,
-  BUFFER_UPDATE,
-  READ_ASCII,
-  READ_KHMER,
-  CORRECT_SUB
+#define GLYPH_BASE_START 0x1780
+#define GLYPH_BASE_STOP  0x17B3
+#define GLYPH_GET_ORD(x) x - GLYPH_BASE_START
+#define GLYPH_GET_BASE(x) x - 0xE000 + 0x1780
+#define GLYPH_GET_BASE_SUB(b) 0xE000 + GLYPH_GET_ORD(b)
+#define GLYPH_GET_BASE_SUB2(b) 0xE050 + GLYPH_GET_ORD(b)
+#define GLYPH_GET_VOWEL_SUB(v) 0xE000 + GLYPH_GET_ORD(v)
+#define GLYPH_GET_RO_FEATURE(f) 0xE0A0 + GLYPH_GET_ORD(f)
+#define GLYPH_GET_TREYSAP_FEATURE(f) 0xE0E0 + GLYPH_GET_ORD(f)
+
+enum {
+  CAT_VPRE = 0,
+  CAT_COENG_RO,
+  CAT_BASE,
+  CAT_COENG,
+  CAT_SHIFT,
+  CAT_VB,
+  CAT_VA,
+  CAT_ROBAT,
+  CAT_VPOST,
+  CAT_MS,
+  CAT_MF,
+  CAT_OTHER
 };
+
+static const uint8_t categories[] = {
+  [GLYPH_GET_ORD(0x1780) ... GLYPH_GET_ORD(0x17A2)] = CAT_BASE,
+  [GLYPH_GET_ORD(0x17A3) ... GLYPH_GET_ORD(0x17A4)] = CAT_OTHER,
+  [GLYPH_GET_ORD(0x17A5) ... GLYPH_GET_ORD(0x17B3)] = CAT_BASE,
+  [GLYPH_GET_ORD(0x17B4) ... GLYPH_GET_ORD(0x17B5)] = CAT_OTHER,
+  [GLYPH_GET_ORD(0x17B6)]                           = CAT_VPOST,
+  [GLYPH_GET_ORD(0x17B7) ... GLYPH_GET_ORD(0x17BA)] = CAT_VA,
+  [GLYPH_GET_ORD(0x17BB) ... GLYPH_GET_ORD(0x17BD)] = CAT_VB,
+  [GLYPH_GET_ORD(0x17BE) ... GLYPH_GET_ORD(0x17C0)] = CAT_VPOST,
+  [GLYPH_GET_ORD(0x17C1) ... GLYPH_GET_ORD(0x17C3)] = CAT_VPRE,
+  [GLYPH_GET_ORD(0x17C4) ... GLYPH_GET_ORD(0x17C5)] = CAT_VPOST,
+  [GLYPH_GET_ORD(0x17C6)]                           = CAT_MS,
+  [GLYPH_GET_ORD(0x17C7) ... GLYPH_GET_ORD(0x17C8)] = CAT_MF,
+  [GLYPH_GET_ORD(0x17C9) ... GLYPH_GET_ORD(0x17CA)] = CAT_SHIFT,
+  [GLYPH_GET_ORD(0x17CB)]                           = CAT_MS,
+  [GLYPH_GET_ORD(0x17CC)]                           = CAT_ROBAT,
+  [GLYPH_GET_ORD(0x17CD) ... GLYPH_GET_ORD(0x17D1)] = CAT_MS,
+  [GLYPH_GET_ORD(0x17D2)]                           = CAT_COENG,
+  [GLYPH_GET_ORD(0x17D3)]                           = CAT_MS,
+  [GLYPH_GET_ORD(0x17D4) ... GLYPH_GET_ORD(0x17DC)] = CAT_OTHER,
+  [GLYPH_GET_ORD(0x17DD)]                           = CAT_MS
+};
+
+#define CAT(g) categories[GLYPH_GET_ORD(g)]
+
+struct unicode_t {
+  int charcat;
+  int encoding;
+};
+
+static void log_unicode_array(struct unicode_t *buf, int size)
+{
+  for (int i = 0; i < size; ++i)
+  {
+    if (buf[i].encoding > 0)
+    {
+      printf("0x%x (%d), ", buf[i].encoding, buf[i].charcat);
+    }
+  }
+  printf("\n");
+}
+
+static int data_cmp(const void *a, const void *b)
+{
+  const struct unicode_t *da = a, *db = b;
+
+  return da->charcat < db->charcat ? -1 : da->charcat > db->charcat;
+}
 
 static uint8_t is_base_glyph(uint16_t u)
 {
-  return (u >= 0x1780 && u <= 0x17B3) || (u >= 0x17D4 && u <= 0x17E9);
+  return (u >= GLYPH_BASE_START && u <= GLYPH_BASE_STOP);
+}
+
+static uint8_t is_other_glyph(uint16_t u)
+{
+  return (u >= 0x17D4 && u <= 0x17E9);
 }
 
 static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, const char *str)
@@ -39,268 +109,203 @@ static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint
     str++;
     if ( e != 0x0fffe)
     {
-      // remap subscript code point to Private Use Area 0xE000
-      if (e_prev == 0x17D2)
-      {
-        e += 0xC880;
-        // else if (e >= 0x178A && e <= 0x179C) e += 0xC881;
-        // else if (e >= 0x179F && e <= 0x17A0) e += 0xC87F;
-        // else if (e == 0x17A2) e = 0xE020;
-      }
-
-      // discard COENG code point and store decoded code point to buffer
-      if (e != 0x17D2)
-      {
-        *(in_ptr++) = e;
-//        Serial.print("U+"); Serial.print(e, HEX); Serial.print(" ");  
-      }
-      
-      e_prev = e;
+      *(in_ptr++) = e;
     }
   }
 
-  // printf("\n\nShape output:");
-  uint8_t state = START;
-  uint16_t pref[2] = {0, 0}; // 0: pre-base vowel, 1: sub 2
-  uint16_t base = 0;    // base consonant
-  uint16_t blwf[3] = {0, 0, 0}; // 0: sub 1/3, 1: sub 1/3, 2: below-base vowel
-  uint16_t abvf[2] = {0, 0}; // 0: regshift, 1: above-base vowel
-  uint16_t pstf[4] = {0, 0, 0, 0}; // 0: post-base vowel, 1: post-base vowel, 2: post-base vowel
-  uint16_t ascii = 0;
-  while (state != STOP)
+  in_ptr = (uint16_t*)&e_buf_in;
+  while (*(in_ptr) != 0)
   {
-    switch (state)
+    // start reading khmer consonant cluster
+    int idx = 0;
+    struct unicode_t buf[10] = {0};
+    int g = *(in_ptr++);
+    if (g < 255 || CAT(g) == CAT_OTHER)
     {
-      case START:
+      *(out_ptr++) = g;
+      printf("0x%x\n", g);
+      printf("\n");
+      continue;
+    }
+
+    buf[idx++].encoding = g;
+    int g_prev = g;
+    while(1)
+    {
+      g = *(in_ptr++);
+      if (g < 255 || CAT(g) == CAT_OTHER)
       {
-        in_ptr = (uint16_t*)&e_buf_in;
-        out_ptr = (uint16_t*)&e_buf_out;
-        state = BUFFER_UPDATE;
+        in_ptr--;
         break;
       }
-      case BUFFER_UPDATE:
+      else if (CAT(g_prev) != CAT_COENG && CAT(g) == CAT_BASE)
       {
-        // update ascii
-        if (ascii != 0)
-        {
-          *(out_ptr++) = ascii;
-          // printf(" U+%X", ascii);
-          ascii = 0;
-        }
-
-        // update khmer 
-        for (int i = 0; i < 2; ++i)
-        {
-          if (pref[i] != 0)
-          {
-            *(out_ptr++) = pref[i];
-            // printf(" U+%X", pref[i]);
-            pref[i] = 0;
-          }
-        }
-
-        if (base != 0)
-        {
-          *(out_ptr++) = base;
-          // printf(" U+%X", base);
-          base = 0;
-        }
-
-        for (int i = 0; i < 3; ++i)
-        {
-          if (blwf[i] != 0)
-          {
-            *(out_ptr++) = blwf[i];
-            // printf(" U+%X", blwf[i]);
-            blwf[i] = 0;
-          }
-        }
-
-        for (int i = 0; i < 2; ++i)
-        {
-          if (abvf[i] != 0)
-          {
-            *(out_ptr++) = abvf[i];
-            // printf(" U+%X", abvf[i]);
-            abvf[i] = 0;
-          }
-        }
-
-        for (int i = 0; i < 4; ++i)
-        {
-          if (pstf[i] != 0)
-          {
-            *(out_ptr++) = pstf[i];
-            // printf(" U+%X", pstf[i]);
-            pstf[i] = 0;
-          }
-        }
-
-        // check for end of string
-        if (*(in_ptr) == 0) 
-        {
-          state = STOP;
-        }
-        else if (*(in_ptr) < 256)
-        {
-          state = READ_ASCII;
-        }
-        else
-        {
-          state = READ_KHMER;
-        }
+        in_ptr--;
         break;
       }
-      case READ_ASCII:
+
+      // add 0x17C1 (េ) for all VPOST glyph
+      if (CAT(g) == CAT_VPOST && g != 0x17B6)
+        buf[idx++].encoding = 0x17C1;
+
+      buf[idx++].encoding = g;
+      g_prev = g;
+    }
+
+    if (idx == 1) { 
+      *(out_ptr++) = buf[0].encoding;
+      printf("0x%x (%d)\n", buf[0].encoding, CAT(buf[0].encoding));
+      printf("\n");
+      continue;
+    }
+
+    // start shaping
+
+    // create a category map
+    for (int i = 0; i < sizeof(buf)/sizeof(*buf); ++i)
+    {
+      buf[i].charcat = CAT_OTHER;
+      if (buf[i].encoding > 0)
       {
-        ascii = *(in_ptr++);
-        state = BUFFER_UPDATE;
-        break;
+        // substitute COENG and COENG RO then remove 0x17D2
+        buf[i].charcat = CAT(buf[i].encoding);
+        if (i > 0 && buf[i-1].encoding == 0x17D2)
+        {
+          if (buf[i].encoding == 0x179A) buf[i].charcat = CAT_COENG_RO;
+          buf[i].encoding = GLYPH_GET_BASE_SUB(buf[i].encoding);
+          buf[i-1].encoding = 0;
+          buf[i-1].charcat = CAT_OTHER;
+        }
       }
-      case READ_KHMER:
+    }
+
+    for (int i = 0; i < sizeof(buf)/sizeof(*buf); ++i)
+    {
+      if (buf[i].encoding > 0)
       {
-        uint16_t u = *(in_ptr);
-        /* syllable reorder */
-        // check pre-base vowel, then COENG RO
-        if (u >= 0x17C1 && u <= 0x17C3) 
+        if (buf[i].encoding == 0x17B7 && buf[i+1].encoding == 0x17CD)
         {
-          pref[0] = u;
-        }
-        else if (u == 0xE01A) 
-        {
-          pref[1] = u;
+          buf[i].encoding = 0xE030;
+          buf[i+1].encoding = 0;
+          buf[i+1].charcat = CAT_OTHER;
         }
 
-        // check base consonant
-        if (is_base_glyph(u)) 
+        // apply feature for RO
+        if (buf[0].encoding == 0x179A)  
         {
-          base = u;
-        }
-
-        // check for sub type 1 and 3, then below-base vowel
-        if (u >= 0xE000 && u <= 0xE021 && u != 0xE01A)
-        {
-          if (blwf[0] == 0) blwf[0] = u;
-          else blwf[1] = u;
-        }
-        else if (u >= 0x17BB && u <= 0x17BD)
-        {
-          blwf[2] = u;
-        }
-
-        // check for regshift, then above-base vowel
-        if (u >= 0x17C9 && u <= 0x17D1) abvf[0] = u;
-        else if ((u >= 0x17B7 && u <= 0x17BA) || (u == 0x17C6) || (u == 0x17BE))
-        {
-          if (u == 0x17BE) 
+          if (CAT(buf[i].encoding) == CAT_VA || buf[i].encoding == 0x17C6 || 
+              buf[i].encoding == 0x17C9)
           {
-            abvf[1] = u;
-            pref[0] = 0x17C1;
-          }
-          else if (u == 0x17C6 && *(in_ptr-1) == 0x17B6)
-          {
-            pstf[2] = u;
-          }
-          else
-          {
-            abvf[1] = u;
+            buf[i].encoding = GLYPH_GET_RO_FEATURE(buf[i].encoding);
           }
         }
 
-        // support for  ិ៍
-        if (u == 0x17CD && abvf[1] == 0x17B7)
+        // apply feature for TREYSAP
+        if (buf[0].encoding == 0x1794 && buf[i].encoding == 0x17CA)
         {
-          abvf[1] = 0;
-          abvf[0] = 0xE064;
+          i++;
+          buf[i].encoding = GLYPH_GET_TREYSAP_FEATURE(buf[i].encoding);
+          continue;
         }
 
-        // check for post-base vowel
-        if (u == 0x17B6 || u == 0x17BF || u == 0x17C0 || u == 0x17C4 || u == 0x17C5 || u == 0x17C7 || u == 0x17C8)
+        // apply reg shift feature
+        if (buf[i].encoding == 0x17C9 || buf[i].encoding == 0x17CA)
         {
-          if (u == 0x17C7 || u == 0x17C8)
+          if (buf[i+1].charcat == CAT_VA)
           {
-            pstf[2] = u;
-          }
-          else if (u == 0x17B6 || u == 0x17C4 || u == 0x17C5)
-          {
-            pstf[1] = u;
-          }
-          else
-          {
-            pstf[0] = u;
-          }
-          
-          if (u != 0x17B6 && u != 0x17C7 && u != 0x17C8)
-          {
-            pref[0] = 0x17C1;
+            buf[i].encoding = 0x17BB;
+            buf[i].charcat = CAT(buf[i].encoding); 
           }
         }
-
-        in_ptr++;
-
-        if (*(in_ptr) < 256 || is_base_glyph(*(in_ptr))) {
-          state = CORRECT_SUB;
-        }
-        break;
       }
-      case CORRECT_SUB:
+    }
+    printf("before sort: "); log_unicode_array(buf, sizeof(buf)/sizeof(*buf));
+    qsort(buf, sizeof(buf)/sizeof(*buf), sizeof(*buf), data_cmp);
+    printf("after sort: "); log_unicode_array(buf, sizeof(buf)/sizeof(*buf));
+    printf("\n");
+
+    // apply ligature
+    for (int i = 0; i < sizeof(buf)/sizeof(*buf); ++i)
+    {
+      if (buf[i].encoding > 0)
       {
-        // substitute COENG RO with longer version if glyph width is
-        // smaller or equal to KA
-        if (pref[1] != 0 && blwf[0] != 0 &&
-          u8g2_GetGlyphWidth(u8g2, base) <= u8g2_GetGlyphWidth(u8g2, 0x1780))
+        // apply BA feature
+        if (buf[i].encoding == 0x1794)
         {
-          pref[1] = 0xE02B;
-        }
-
-        // substitute BA
-        if (base == 0x1794 && (pstf[1] == 0x17B6
-          || pstf[1] == 0x17C4 || pstf[1] == 0x17C5))
-        {
-          base = 0xE062;
-        }
-
-        // substitute NHO
-        if (base == 0x1789 && blwf[0] != 0)
-        {
-          base = 0xE061;
-          if (blwf[0] == 0xE009)
+          if (buf[i+1].encoding == 0x17C9 && buf[i+2].encoding == 0x17B6)
           {
-            blwf[0] = 0xE060;
+            buf[i].encoding = 0x17EA;
+          }
+          else if (buf[i+1].encoding == 0x17B6 || 
+              buf[i+1].encoding == 0x17C4 || 
+              buf[i+1].encoding == 0x17C5)
+          {
+            buf[i].encoding = 0x17EA;
+          }
+          else if (buf[i+2].encoding == 0x17B6 || 
+              buf[i+2].encoding == 0x17C4 || 
+              buf[i+2].encoding == 0x17C5)
+          {
+            if (buf[i+1].charcat == CAT_BASE &&
+                GLYPH_GET_BASE(buf[i+1].encoding) != 0x1783 &&
+                GLYPH_GET_BASE(buf[i+1].encoding) != 0x1788 &&
+                GLYPH_GET_BASE(buf[i+1].encoding) != 0x178D &&
+                GLYPH_GET_BASE(buf[i+1].encoding) != 0x1794 &&
+                GLYPH_GET_BASE(buf[i+1].encoding) != 0x1799 &&
+                GLYPH_GET_BASE(buf[i+1].encoding) != 0x179F)
+              {
+                buf[i].encoding = 0x17EA;
+              }
           }
         }
 
-        // substitute COENG MO and COENG HA
-        // if (blwf[1] == 0xE019) blwf[1] = 0xE044;
-        // if (blwf[1] == 0xE01F) blwf[1] = 0xE045;
-
-        // subsitute regshift
-        if (abvf[0] == 0x17C9 || abvf[0] == 0x17CA)
+        // apply NHO feature
+        if (buf[i].encoding == 0x1789)
         {
-          if ((abvf[1] >= 0x17B7 && abvf[1] <= 0x17BA) 
-            || abvf[1] == 0x17BE
-            || pstf[2] == 0x17C6)
+          if (is_base_glyph(GLYPH_GET_BASE(buf[i+1].encoding)))
           {
-            abvf[0] = 0;
-            blwf[2] = 0x17BB;
+            buf[i].encoding = 0x17EB;
+          }
+          if (GLYPH_GET_BASE(buf[i+1].encoding) == 0x1789)
+          {
+            buf[i+1].encoding = GLYPH_GET_BASE_SUB2(0x1789);
           }
         }
 
-        // substitute below vowel
-        if (blwf[0] != 0 && blwf[2] != 0)
+        // apply second substitute feature
+        if (is_base_glyph(GLYPH_GET_BASE(buf[i].encoding)) && 
+            is_base_glyph(GLYPH_GET_BASE(buf[i+1].encoding)))
         {
-          blwf[2] += 0xC880;
+          if (GLYPH_GET_BASE(buf[i].encoding) != 0x179F &&
+              GLYPH_GET_BASE(buf[i].encoding) != 0x1799 &&
+              GLYPH_GET_BASE(buf[i].encoding) != 0x178D &&
+              GLYPH_GET_BASE(buf[i].encoding) != 0x178E &&
+              GLYPH_GET_BASE(buf[i].encoding) != 0x179B &&
+              GLYPH_GET_BASE(buf[i].encoding) != 0x17A0 &&
+              GLYPH_GET_BASE(buf[i].encoding) != 0x1783 && 
+              GLYPH_GET_BASE(buf[i].encoding) != 0x1788 &&
+              GLYPH_GET_BASE(buf[i].encoding) != 0x1789)
+          {
+            buf[i+1].encoding = GLYPH_GET_BASE_SUB2(buf[i+1].encoding);
+          }
         }
 
-        // substitue post vowel
-        if (blwf[0] != 0 && pstf[0] != 0) pstf[0] += 0xC880;
-        
-        state = BUFFER_UPDATE;
-        break;
+        // apply second vowel feature
+        if(is_base_glyph(GLYPH_GET_BASE(buf[i].encoding)) && buf[i+1].charcat == CAT_VB)
+        {
+          buf[i+1].encoding = GLYPH_GET_VOWEL_SUB(buf[i+1].encoding);
+        }
+      }
+    }
+
+    for (int i = 0; i < sizeof(buf)/sizeof(*buf); ++i)
+    {
+      if (buf[i].encoding > 0)
+      {
+        *(out_ptr++) = buf[i].encoding;
       }
     }
   }
-  // printf("\n\r");
 
   out_ptr = (uint16_t*)e_buf_out;
 
