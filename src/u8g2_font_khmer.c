@@ -47,7 +47,8 @@ static const uint8_t categories[] = {
   [GLYPH_GET_ORD(0x17D2)]                           = CAT_COENG,
   [GLYPH_GET_ORD(0x17D3)]                           = CAT_MS,
   [GLYPH_GET_ORD(0x17D4) ... GLYPH_GET_ORD(0x17DC)] = CAT_OTHER,
-  [GLYPH_GET_ORD(0x17DD)]                           = CAT_MS
+  [GLYPH_GET_ORD(0x17DD)]                           = CAT_MS,
+  [GLYPH_GET_ORD(0x17E0) ... GLYPH_GET_ORD(0x17EB)] = CAT_OTHER
 };
 
 #define CAT(g) categories[GLYPH_GET_ORD(g)]
