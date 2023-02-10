@@ -79,8 +79,8 @@ static int data_cmp(const void *a, const void *b)
 static u8g2_uint_t u8g2_draw_string_khmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, const char *str)
 {
   uint16_t e, e_prev = 0;
-  uint16_t e_buf_in[1024] = {0};
-  uint16_t e_buf_out[1024] = {0};
+  uint16_t e_buf_in[256] = {0};
+  uint16_t e_buf_out[256] = {0};
   uint16_t * in_ptr; 
   uint16_t * out_ptr;
   u8g2_uint_t delta, sum;
