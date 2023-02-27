@@ -8,7 +8,6 @@ extern const uint8_t u8g2KHTest_R16[] U8G2_FONT_SECTION(u8g2KHTest_R16);
 extern const uint8_t notosans_6x9[] U8G2_FONT_SECTION(notosans_6x9);
 extern const uint8_t notosans_6x8[] U8G2_FONT_SECTION(notosans_6x8);
 extern const uint8_t khmerR12[] U8G2_FONT_SECTION(khmerR12);
-extern const uint8_t helvR08_custom[] U8G2_FONT_SECTION(helvR08_custom);
 
 u8g2_uint_t u8g2_DrawKhmer(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, const char *str);
 
