@@ -6,6 +6,7 @@ set(srcs
 	"fonts/waffle_10.c"
 	"fonts/khmerR12.c"
 	"fonts/helvR08_custom.c"
+    "fonts/khmerR12_waffle.c"
 )
 idf_component_register(SRCS "${srcs}"  
                     INCLUDE_DIRS "include"
